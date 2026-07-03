@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# lockfiles
+package-lock.json
+
+# editor
+.vscode/
+.idea/
+
+# local temp folders
+.claude/
+
+# images output
+public/images/

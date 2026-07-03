@@ -1,26 +1,519 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Paleta — editorial cálido */
+  --color-cream: #faf5ec;
+  --color-cream-deep: #f2e9da;
+  --color-ink: #241d15;
+  --color-ink-soft: #6f6355;
+  --color-primary: #d96b2f;
+  --color-primary-dark: #a84c19;
+  --color-primary-soft: #f5e3cd;
+
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-vhs: var(--font-vt323), "Courier New", monospace;
+
+  /* Escala tipográfica fluida */
+  --text-display: clamp(2.75rem, 1.3rem + 6.6vw, 6.5rem);
+  --text-display--line-height: 0.98;
+  --text-display--letter-spacing: -0.02em;
+  --text-title: clamp(2.125rem, 1.4rem + 3.1vw, 3.9rem);
+  --text-title--line-height: 1.03;
+  --text-title--letter-spacing: -0.015em;
+  --text-lead: clamp(1.0625rem, 0.98rem + 0.45vw, 1.3125rem);
+  --text-lead--line-height: 1.6;
+
+  --ease-out-expo: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-weighty: cubic-bezier(0.65, 0.01, 0.05, 0.99);
+
+  --animate-spin-slow: spin 18s linear infinite;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-ink);
+  color: var(--color-cream);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Los reveals laterales no deben generar scroll horizontal */
+  overflow-x: clip;
+}
+
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-cream);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary-dark);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* ---------- Reveal al hacer scroll (activado por ScrollReveal) ---------- */
+
+/* Cortes duros en pasos: entrada estilo edición de video casero.
+   Variantes direccionales: los elementos entran de afuera hacia adentro,
+   acompañando el movimiento del video de fondo. */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition:
+    opacity 0.5s steps(5) var(--d, 0ms),
+    transform 0.5s steps(5) var(--d, 0ms);
+}
+
+html.js [data-reveal="left"] {
+  transform: translateX(-4rem);
+}
+
+html.js [data-reveal="right"] {
+  transform: translateX(4rem);
+}
+
+html.js [data-reveal="zoom"] {
+  transform: scale(1.12);
+}
+
+html.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* El clip se aplica al hijo: un elemento totalmente recortado tiene
+   rectángulo de intersección vacío y el IntersectionObserver nunca lo ve */
+html.js [data-reveal="clip"] {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+html.js [data-reveal="clip"] > * {
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 0.6s steps(8) var(--d, 0ms);
+}
+
+html.js [data-reveal="clip"].is-visible > * {
+  clip-path: inset(0 0 0 0);
+}
+
+/* ---------- Entrada del hero (solo al cargar, sin JS) ---------- */
+
+.hero-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.hero-line-inner {
+  display: block;
+  transform: translateY(115%);
+  animation: hero-up 0.5s steps(6) forwards;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes hero-up {
+  to {
+    transform: translateY(0);
+  }
+}
+
+.hero-fade {
+  opacity: 0;
+  transform: translateY(1.25rem);
+  animation: hero-fade 0.9s var(--ease-out-expo) forwards;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes hero-fade {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Subrayado que se dibuja bajo la palabra acento */
+.draw-path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 0.9s var(--ease-weighty) 1.15s forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------- Marquesina ---------- */
+
+.marquee {
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+}
+
+.marquee-track {
+  display: flex;
+  flex-shrink: 0;
+  min-width: 100%;
+  align-items: center;
+  gap: var(--gap, 1rem);
+  padding-right: var(--gap, 1rem);
+  animation: marquee var(--speed, 40s) linear infinite;
+}
+
+.marquee-reverse .marquee-track {
+  animation-direction: reverse;
+}
+
+@media (hover: hover) {
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* ---------- Enlaces con subrayado direccional ---------- */
+
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s var(--ease-out-expo);
+}
+
+@media (hover: hover) {
+  .link-underline:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* ---------- Botón WhatsApp flotante: anillo de pulso ---------- */
+
+.pulse-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: pulse 2.4s var(--ease-out-expo) infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 18px rgba(37, 211, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+/* ---------- Wordmark gigante del footer ---------- */
+
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(250, 245, 236, 0.22);
+}
+
+/* ---------- Botón retro VHS ---------- */
+
+.btn-vhs {
+  font-family: var(--font-vhs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 2px solid currentColor;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.75rem;
+  transition:
+    background-color 0.15s steps(2),
+    color 0.15s steps(2),
+    border-color 0.15s steps(2);
+}
+
+/* ---------- Marco de monitor CRT para imágenes/mapa ---------- */
+
+/* Sin position propio: cada uso declara relative/absolute con utilities */
+.crt-frame {
+  border: 2px solid rgba(250, 245, 236, 0.3);
+  background: var(--color-ink);
+}
+
+/* Sangrado cromático al pasar sobre los enlaces del nav */
+@media (hover: hover) {
+  .nav-link-90s:hover {
+    text-shadow:
+      2px 0 0 rgba(255, 70, 40, 0.65),
+      -2px 0 0 rgba(60, 255, 220, 0.5);
+  }
+}
+
+/* ---------- Botón biselado estilo interfaz de los 90 ---------- */
+
+/* Sin display propio: cada uso declara inline-flex/hidden con utilities */
+.btn-bevel {
+  font-family: var(--font-vhs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #43382c;
+  border: 2px solid;
+  border-color: rgba(250, 245, 236, 0.5) rgba(0, 0, 0, 0.65) rgba(0, 0, 0, 0.65)
+    rgba(250, 245, 236, 0.5);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+  padding: 0.45rem 1.1rem;
+  transition: background-color 0.15s steps(2);
+}
+
+.btn-bevel:hover {
+  background: #524433;
+}
+
+.btn-bevel:active {
+  border-color: rgba(0, 0, 0, 0.65) rgba(250, 245, 236, 0.5)
+    rgba(250, 245, 236, 0.5) rgba(0, 0, 0, 0.65);
+  box-shadow: none;
+  translate: 2px 2px;
+}
+
+/* ---------- Monitor 3D para el mapa ---------- */
+
+.monitor-3d {
+  transform: perspective(1400px) rotateY(-7deg) rotateX(2deg);
+  transform-style: preserve-3d;
+  transition: transform 0.5s var(--ease-out-expo);
+  box-shadow:
+    -16px 20px 0 rgba(0, 0, 0, 0.45),
+    -30px 40px 70px rgba(0, 0, 0, 0.4);
+}
+
+@media (hover: hover) {
+  .monitor-3d:hover {
+    transform: perspective(1400px) rotateY(0deg) rotateX(0deg);
+  }
+}
+
+/* Bisel del monitor */
+.monitor-bezel {
+  background: #43382c;
+  border: 3px solid;
+  border-color: rgba(250, 245, 236, 0.45) rgba(0, 0, 0, 0.7) rgba(0, 0, 0, 0.7)
+    rgba(250, 245, 236, 0.45);
+  padding: 0.9rem;
+}
+
+.crt-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.2) 2px,
+    rgba(0, 0, 0, 0.2) 4px
+  );
+}
+
+/* ---------- Menú hamburguesa que muta a X ---------- */
+
+.burger-line {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: currentColor;
+  transition:
+    transform 0.3s var(--ease-out-expo),
+    opacity 0.3s var(--ease-out-expo);
+}
+
+.burger-line + .burger-line {
+  margin-top: 6px;
+}
+
+.burger-open .burger-line:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.burger-open .burger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.burger-open .burger-line:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* ---------- Cinta VHS (sección de video con scroll) ---------- */
+
+/* Líneas de barrido de CRT */
+.vhs-scanlines {
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.22) 2px,
+    rgba(0, 0, 0, 0.22) 4px
+  );
+}
+
+/* Estática de la cinta */
+.vhs-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  animation: vhs-noise 0.35s steps(2) infinite;
+}
+
+@keyframes vhs-noise {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 80px 40px;
+  }
+  100% {
+    background-position: -60px -70px;
+  }
+}
+
+/* Viñeta de tubo de imagen */
+.vhs-vignette {
+  background:
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.5) 100%),
+    linear-gradient(to right, rgba(0, 0, 0, 0.35), transparent 8%, transparent 92%, rgba(0, 0, 0, 0.35));
+}
+
+/* Salto de tracking ocasional en la imagen */
+.vhs-jitter {
+  animation: vhs-jitter 7s infinite;
+}
+
+@keyframes vhs-jitter {
+  0%,
+  92%,
+  100% {
+    transform: none;
+    filter: none;
+  }
+  93% {
+    transform: translateY(3px) skewX(0.5deg);
+    filter: brightness(1.2) saturate(1.4);
+  }
+  94.5% {
+    transform: translateY(-3px);
+    filter: brightness(0.9);
+  }
+  96% {
+    transform: none;
+    filter: none;
+  }
+}
+
+/* Sangrado de color Y/C: aberración cromática en texto */
+.vhs-chroma {
+  text-shadow:
+    2px 0 0 rgba(255, 70, 40, 0.65),
+    -2px 0 0 rgba(60, 255, 220, 0.5);
+}
+
+/* Parpadeo duro de OSD (REC, indicaciones) */
+.vhs-blink {
+  animation: vhs-blink 1.1s steps(1) infinite;
+}
+
+@keyframes vhs-blink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Entrada de subtítulos: corte duro en pasos, nada de fades suaves */
+.vhs-caption {
+  animation: vhs-caption 0.28s steps(3) both;
+}
+
+@keyframes vhs-caption {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scaleY(0.6);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Movimiento reducido ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html.js [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+
+  html.js [data-reveal="clip"] > * {
+    clip-path: none;
+  }
+
+  .hero-line-inner {
+    transform: none;
+    animation: none;
+  }
+
+  .hero-fade {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .draw-path {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
 }
