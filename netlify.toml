@@ -1,6 +1,6 @@
 [build]
   command = "npm run build"
-  publish = ".next"
+  # Let the Netlify Next.js plugin determine the correct publish and functions directories.
 
 [build.environment]
   NODE_VERSION = "20"
