@@ -51,4 +51,4 @@ package-lock.json
 .claude/
 
 # images output
-public/images/
+# (keep images tracked in repo)
